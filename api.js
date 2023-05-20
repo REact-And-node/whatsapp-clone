@@ -96,7 +96,7 @@ const upload = multer({ storage });
 
 app.post('/upload', upload.single('file'), (req, res) => {
   const file = req.file;
-  if (!file) return req.status(404).json("File not found");
+  if (!file) return res.status(404).json("File not found");
 
   const imageUrl = `https://mypotal-com.onrender.com/file/${file.filename}`;
 
