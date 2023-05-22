@@ -120,11 +120,12 @@ app.post('/chat',async(req,res) => {
   const collection = client.db('whatsapp').collection('conversation')
   // await collection.findOne({senderId:body.senderId,reciverId:body.reciverId})
   // documents===undefined||documents==null?
-  let day = date.getDate();
-  let month = date.getMonth() + 1;
-  let year = date.getFullYear();
+
+  const now = new Date(); 
+   let day = now.getDate();
+  let month = now.getMonth() + 1;
+  let year = now.getFullYear();
   let currentDate = `${day}-${month}-${year}`;
-  const now = new Date();
   const hours=now.getHours()
   var ampm = hours >= 12 ? 'pm' : 'am';
 const hoursAndMinutes = now.getHours() + ':'+(now.getMinutes()<10?'0':'') + now.getMinutes() +ampm;
