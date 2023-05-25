@@ -44,7 +44,7 @@ const server=http.createServer(app)
 const io = new Server(9000, {
   cors:
   {
-  origin: 'http://localhost:3000'
+  origin: 'https://whatsapp-clone-c654f.web.app'
   ,methods:["GET","POST"]
   }
   }
