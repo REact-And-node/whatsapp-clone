@@ -1,9 +1,12 @@
 var express = require("express");
-const { ObjectId } = require("mongodb");
+const http = require('http');
+const {Server}  =require("socket.io");
+
 var mongoose=require("mongoose")
 const grid = require('gridfs-stream');
 const {GridFsStorage} = require('multer-gridfs-storage');
 const multer = require('multer');
+const { Console } = require("console");
 var app = express();
 app.use(express.json());
 app.use(function (req, res, next) {
@@ -15,8 +18,7 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
   next();
 });
-const port = 2410;
-
+const port =2410;
 
 const MongoClient = require('mongodb').MongoClient;
 mongoose.connect('mongodb+srv://mdsheikh6234:Nafish%4014@cluster0.fko8vta.mongodb.net/', {
@@ -36,8 +38,43 @@ let gfs, gridfsBucket;
 
 
 
+const server=http.createServer(app)
+
+
+const io = new Server(9000, {
+  cors:
+  {
+  origin: 'http://localhost:3000'
+  ,methods:["GET","POST"]
+  }
+  }
+  )
+
+  io.on("connection", (socket) => { 
+      console.log(`user connected:' ${socket.id}`);
+      socket.on('sendMessage', data => {
+        const now = new Date(); 
+        let day = now.getDate();
+       let month = now.getMonth() + 1;
+       let year = now.getFullYear();
+       const hours=now.getHours()
+       let currentDate = `${day}-${month}-${year}`;
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        const hoursAndMinutes = now.getHours() + ':'+(now.getMinutes()<10?'0':'') + now.getMinutes()+ " " +ampm;
+        let arr={...data,timestamps: hoursAndMinutes,date:currentDate}
+     console.log('sendMessage',arr)
+     socket.broadcast.emit("getMessage",arr)
+  })
+  })
+
+
+
+
+
+
+
 conn.once('open', () => {
-  console.log('Connected to MongoDB');
+ 
   
   gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
     bucketName: 'fs'
@@ -83,9 +120,15 @@ app.post('/login',async(req,res) => {
 
   const collection = client.db('whatsapp').collection('user')
   const documents = await collection.findOne({email:body.email})
-  documents===undefined?await collection.insertOne(body):""
+  // documents===undefined|| documents===null?await collection.insertOne(body):""
+console.log(documents)
+const adduser =(documents, socketId) =>{
+  !users.some(user => user.sub ==documents.sub) && users.push({...documents, socketId });
+  Console.log("socketId",socketId)
+  }
+console.log(body)
 
-  res.send(body)
+  res.send(documents)
 
   
   
@@ -128,12 +171,22 @@ app.post('/chat',async(req,res) => {
   let currentDate = `${day}-${month}-${year}`;
   const hours=now.getHours()
   var ampm = hours >= 12 ? 'pm' : 'am';
-const hoursAndMinutes = now.getHours() + ':'+(now.getMinutes()<10?'0':'') + now.getMinutes() +ampm;
+const hoursAndMinutes = now.getHours() + ':'+(now.getMinutes()<10?'0':'') + now.getMinutes()+ " " +ampm;
 const documents =await collection.insertOne({Id:[body.senderId,body.receiverId],...body, timestamps: hoursAndMinutes,date:currentDate})
+var currentDate1 = "22-5-2023";
+var fallbackDate = "22rs-5-2023";
+
+const documents1 =await collection.updateMany(
+  { date: { $exists: false } },
+  { $set: { date: fallbackDate } }
+)
+
  
-  
+  // console.log(documents1)
+  // console.log(currentDate)
+  // console.log(hoursAndMinutes)
  
-  res.send(body)
+  res.send({Id:[body.senderId,body.receiverId],...body, timestamps: hoursAndMinutes,date:currentDate})
 
   
   
@@ -203,3 +256,4 @@ app.get('/login',async(req,res) => {
 
 
 app.listen(port, () => console.log(`Node app listening on port ${port}!`));
+
