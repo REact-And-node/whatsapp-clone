@@ -89,7 +89,7 @@
     "web-vitals": "^2.1.4",
     "yup": "^1.0.0",
     "zlib": "^1.0.5",
-    "type":"module"
+    
   },
   "scripts": {
     "start": "node api.js",
