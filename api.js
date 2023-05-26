@@ -1,7 +1,7 @@
 var express = require("express");
 const http = require('http');
 const {Server}  =require("socket.io");
-
+const cors=require("cors")
 var mongoose=require("mongoose")
 const grid = require('gridfs-stream');
 const {GridFsStorage} = require('multer-gridfs-storage');
@@ -9,6 +9,7 @@ const multer = require('multer');
 const { Console } = require("console");
 var app = express();
 app.use(express.json());
+app.use(cors());
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -44,8 +45,8 @@ const server=http.createServer(app)
 const io = new Server(9000, {
   cors:
   {
-  origin: 'https://whatsapp-clone-c654f.web.app',
-    methods:["GET","POST"] 
+  origin: '*'
+  ,methods:["GET","POST"] 
   }
   }
   )
